@@ -2,9 +2,9 @@
 
 Here are the main files:
 
-- The RMarkdown file can be found here: https://github.com/STAT545-UBC-students/hw04-aidanh14/blob/master/hw04-aidanh14.Rmd
+- [Click here to go to the main RMarkdown file.](https://github.com/STAT545-UBC-students/hw04-aidanh14/blob/master/hw04-aidanh14.Rmd)
 
-- The output Markdown file can be found here: https://github.com/STAT545-UBC-students/hw04-aidanh14/blob/master/hw04-aidanh14.Rmd
+- [Click here to go to the main output Markdown file.](https://github.com/STAT545-UBC-students/hw04-aidanh14/blob/master/hw04-aidanh14.Rmd)
 
 
 
