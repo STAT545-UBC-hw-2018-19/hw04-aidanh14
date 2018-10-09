@@ -58,12 +58,91 @@ Now we can compare the life expectancies over time of a couple different countri
 lifeExpUntidy %>%
   ggplot(aes(x = year)) +
   geom_point(aes(y = Canada, color = "Canada")) +
+  geom_line(aes(y = Canada, color = "Canada")) +
   geom_point(aes(y = Mexico, color = "Mexico")) +
-  labs(x = "Year", y = "Life Expectancy", color="Countries")
+  geom_line(aes(y = Mexico, color = "Mexico")) +
+  labs(title = "Life Expectancy Vs. Time", x = "Year", y = "Life Expectancy", color="Country") +
+  
+  # Center the title, left-aligned by default
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
 
 # Task 2: *"Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins."*
  
-For the sake of convenience, let's reuse the smaller tibble of random countries that we made in the last task. We can create a second data frame containing the capital city of each country.
+Let's create a tibble from Gapminder of all countries and the continent they're in, then create a second data frame containing only the capital city of some random countries.
+
+```{r countries and continents}
+countries <- gapminder %>%
+  distinct(country, .keep_all = TRUE) %>%
+  select(country, continent)
+
+countries %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+```{r capital cities}
+capitals <- countries %>%
+  select(country) %>%
+  filter(country %in% c("Argentina", "Canada", "Germany", "Japan", "Mexico", "Spain")) %>%
+  cbind("capital" = c("Buenos Aires", "Ottawa", "Berlin", "Tokyo", "Mexico City", "Madrid"))
+
+capitals %>%
+  knitr::kable()
+```
+
+Now let's try using the different join functions on our two datasets and compare the results.
+
+## Inner-join
+
+Using inner-join, the countries that had capitals now also have been joined with their continents.
+
+```{r innerjoin}
+inner_join(x = countries, y = capitals) %>%
+  knitr::kable()
+```
+
+## Semi-join
+
+Using semi-join, we're left with only the countries that have capitals but don't actually join their values for `capital`.
+
+```{r semijoin}
+semi_join(x = countries, y = capitals) %>%
+  knitr::kable()
+```
+
+## Left-join
+
+Using left-join, all countries with continents are kept and are joined with their capital if they have one, otherwise capital is NA. We would expect to get the same result in a full-join as well.
+
+```{r leftjoin}
+left_join(x = countries, y = capitals) %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+## Full-join
+
+```{r fulljoin}
+full_join(x = countries, y = capitals) %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+## Anti-join
+
+With anti-join, we get very different results depending on which dataset is `x` and which is `y`. If `x = countries`, we get a set of all countries without specified capitals. However, with `x = capitals`, we get no results, as there are no countries with a specified capital but no specified continent.
+
+```{r antijoin}
+anti_join(x = countries, y = capitals) %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+```{r antijoin opposite}
+anti_join(x = capitals, y = countries) %>%
+  nrow()
+```
+

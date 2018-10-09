@@ -83,8 +83,13 @@ Now we can compare the life expectancies over time of a couple different countri
 lifeExpUntidy %>%
   ggplot(aes(x = year)) +
   geom_point(aes(y = Canada, color = "Canada")) +
+  geom_line(aes(y = Canada, color = "Canada")) +
   geom_point(aes(y = Mexico, color = "Mexico")) +
-  labs(x = "Year", y = "Life Expectancy", color="Countries")
+  geom_line(aes(y = Mexico, color = "Mexico")) +
+  labs(title = "Life Expectancy Vs. Time", x = "Year", y = "Life Expectancy", color="Country") +
+  
+  # Center the title, left-aligned by default
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ![](hw04-aidanh14_files/figure-markdown_github/lifeExp%20scatterplot-1.png)
@@ -92,4 +97,195 @@ lifeExpUntidy %>%
 Task 2: *"Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins."*
 =================================================================================================================================================================================================================================
 
-For the sake of convenience, let's reuse the smaller tibble of random countries that we made in the last task. We can create a second data frame containing the capital city of each country.
+Let's create a tibble from Gapminder of all countries and the continent they're in, then create a second data frame containing only the capital city of some random countries.
+
+``` r
+countries <- gapminder %>%
+  distinct(country, .keep_all = TRUE) %>%
+  select(country, continent)
+
+countries %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+| country                | continent |
+|:-----------------------|:----------|
+| Afghanistan            | Asia      |
+| Albania                | Europe    |
+| Algeria                | Africa    |
+| Angola                 | Africa    |
+| Argentina              | Americas  |
+| Australia              | Oceania   |
+| Austria                | Europe    |
+| Bahrain                | Asia      |
+| Bangladesh             | Asia      |
+| Belgium                | Europe    |
+| Benin                  | Africa    |
+| Bolivia                | Americas  |
+| Bosnia and Herzegovina | Europe    |
+| Botswana               | Africa    |
+| Brazil                 | Americas  |
+
+``` r
+capitals <- countries %>%
+  select(country) %>%
+  filter(country %in% c("Argentina", "Canada", "Germany", "Japan", "Mexico", "Spain")) %>%
+  cbind("capital" = c("Buenos Aires", "Ottawa", "Berlin", "Tokyo", "Mexico City", "Madrid"))
+
+capitals %>%
+  knitr::kable()
+```
+
+| country   | capital      |
+|:----------|:-------------|
+| Argentina | Buenos Aires |
+| Canada    | Ottawa       |
+| Germany   | Berlin       |
+| Japan     | Tokyo        |
+| Mexico    | Mexico City  |
+| Spain     | Madrid       |
+
+Now let's try using the different join functions on our two datasets and compare the results.
+
+Inner-join
+----------
+
+Using inner-join, the countries that had capitals now also have been joined with their continents.
+
+``` r
+inner_join(x = countries, y = capitals) %>%
+  knitr::kable()
+```
+
+    ## Joining, by = "country"
+
+| country   | continent | capital      |
+|:----------|:----------|:-------------|
+| Argentina | Americas  | Buenos Aires |
+| Canada    | Americas  | Ottawa       |
+| Germany   | Europe    | Berlin       |
+| Japan     | Asia      | Tokyo        |
+| Mexico    | Americas  | Mexico City  |
+| Spain     | Europe    | Madrid       |
+
+Semi-join
+---------
+
+Using semi-join, we're left with only the countries that have capitals but don't actually join their values for `capital`.
+
+``` r
+semi_join(x = countries, y = capitals) %>%
+  knitr::kable()
+```
+
+    ## Joining, by = "country"
+
+| country   | continent |
+|:----------|:----------|
+| Argentina | Americas  |
+| Canada    | Americas  |
+| Germany   | Europe    |
+| Japan     | Asia      |
+| Mexico    | Americas  |
+| Spain     | Europe    |
+
+Left-join
+---------
+
+Using left-join, all countries with continents are kept and are joined with their capital if they have one, otherwise capital is NA. We would expect to get the same result in a full-join as well.
+
+``` r
+left_join(x = countries, y = capitals) %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+    ## Joining, by = "country"
+
+| country                | continent | capital      |
+|:-----------------------|:----------|:-------------|
+| Afghanistan            | Asia      | NA           |
+| Albania                | Europe    | NA           |
+| Algeria                | Africa    | NA           |
+| Angola                 | Africa    | NA           |
+| Argentina              | Americas  | Buenos Aires |
+| Australia              | Oceania   | NA           |
+| Austria                | Europe    | NA           |
+| Bahrain                | Asia      | NA           |
+| Bangladesh             | Asia      | NA           |
+| Belgium                | Europe    | NA           |
+| Benin                  | Africa    | NA           |
+| Bolivia                | Americas  | NA           |
+| Bosnia and Herzegovina | Europe    | NA           |
+| Botswana               | Africa    | NA           |
+| Brazil                 | Americas  | NA           |
+
+Full-join
+---------
+
+``` r
+full_join(x = countries, y = capitals) %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+    ## Joining, by = "country"
+
+| country                | continent | capital      |
+|:-----------------------|:----------|:-------------|
+| Afghanistan            | Asia      | NA           |
+| Albania                | Europe    | NA           |
+| Algeria                | Africa    | NA           |
+| Angola                 | Africa    | NA           |
+| Argentina              | Americas  | Buenos Aires |
+| Australia              | Oceania   | NA           |
+| Austria                | Europe    | NA           |
+| Bahrain                | Asia      | NA           |
+| Bangladesh             | Asia      | NA           |
+| Belgium                | Europe    | NA           |
+| Benin                  | Africa    | NA           |
+| Bolivia                | Americas  | NA           |
+| Bosnia and Herzegovina | Europe    | NA           |
+| Botswana               | Africa    | NA           |
+| Brazil                 | Americas  | NA           |
+
+Anti-join
+---------
+
+With anti-join, we get very different results depending on which dataset is `x` and which is `y`. If `x = countries`, we get a set of all countries without specified capitals. However, with `x = capitals`, we get no results, as there are no countries with a specified capital but no specified continent.
+
+``` r
+anti_join(x = countries, y = capitals) %>%
+  head(15) %>%
+  knitr::kable()
+```
+
+    ## Joining, by = "country"
+
+| country                | continent |
+|:-----------------------|:----------|
+| Afghanistan            | Asia      |
+| Albania                | Europe    |
+| Algeria                | Africa    |
+| Angola                 | Africa    |
+| Australia              | Oceania   |
+| Austria                | Europe    |
+| Bahrain                | Asia      |
+| Bangladesh             | Asia      |
+| Belgium                | Europe    |
+| Benin                  | Africa    |
+| Bolivia                | Americas  |
+| Bosnia and Herzegovina | Europe    |
+| Botswana               | Africa    |
+| Brazil                 | Americas  |
+| Bulgaria               | Europe    |
+
+``` r
+anti_join(x = capitals, y = countries) %>%
+  nrow()
+```
+
+    ## Joining, by = "country"
+
+    ## [1] 0
