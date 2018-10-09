@@ -52,7 +52,17 @@ lifeExpUntidy %>%
 
 Using the `spread()` function makes tables more human-friendly for reading.
 
-Let's use a scatterplot to compare the lfie expectancies over time of the different countries.
+Now we can compare the life expectancies over time of a couple different countries with a scatterplot.
+
+```{r lifeExp scatterplot}
+lifeExpUntidy %>%
+  ggplot(aes(x = year)) +
+  geom_point(aes(y = Canada, color = "Canada")) +
+  geom_point(aes(y = Mexico, color = "Mexico")) +
+  labs(x = "Year", y = "Life Expectancy", color="Countries")
+
+```
+
 
 # Task 2: *"Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins."*
  
