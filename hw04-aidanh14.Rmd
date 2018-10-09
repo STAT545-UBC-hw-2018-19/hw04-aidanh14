@@ -13,7 +13,47 @@ knitr::opts_chunk$set(echo = TRUE)
 
 We were tasked to choose one prompt for reshaping data and one for joining. Here are the two that I chose:
 
-1. *Make a tibble with one row per year and columns for life expectancy for two or more countries.*
+1. *"Make a tibble with one row per year and columns for life expectancy for two or more countries."*
 
-2. *Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins.*
+2. *"Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins."*
 
+As always, import packages first.
+
+```{r packages}
+suppressPackageStartupMessages(library("gapminder"))
+suppressPackageStartupMessages(library("tidyverse"))
+```
+
+
+# Reshaping: *"Make a tibble with one row per year and columns for life expectancy for two or more countries."*
+
+Let's make a new tibble from the Gapminder dataframe with a subset of a few random countries. We'll print the data as a table in long (or "tidy") format first.
+
+```{r tidy table}
+lifeExpTidy <- gapminder %>%
+  select(year, country, lifeExp) %>%
+  filter(country %in% c("Argentina", "Canada", "Germany", "Japan", "Mexico", "Spain"))
+
+# The tibble contains data for all years, but only print data from 1952 and 2002 just to keep the table short
+lifeExpTidy %>%
+  filter(year %in% c("1952", "2002")) %>%
+  knitr::kable()
+```
+
+Now we can use the `spread()` function to reshape our data into wide (or "untidy") format.
+
+```{r untidy table}
+lifeExpUntidy <- lifeExpTidy %>%
+  spread(key="country", value="lifeExp")
+  
+lifeExpUntidy %>%
+  knitr::kable()
+```
+
+Using the `spread()` function makes tables more human-friendly for reading.
+
+Let's use a scatterplot to compare the lfie expectancies over time of the different countries.
+
+# Task 2: *"Create a second data frame, complementary to Gapminder. Join this with (part of) Gapminder using a dplyr join function and make some observations about the process and result. Explore the different types of joins."*
+ 
+For the sake of convenience, let's reuse the smaller tibble of random countries that we made in the last task. We can create a second data frame containing the capital city of each country.
